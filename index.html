@@ -91,7 +91,7 @@
 
         <div class="form-row">
             <div class="form-group" style="margin-bottom: 0;">
-                <label>الولاية:</label>
+                <label>الأمانة الولائية / الفرع:</label>
                 <select id="wilayaCode">
                     </select>
             </div>
@@ -184,18 +184,37 @@
         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzcqjD7W_oGS6YC3n08nh-R-fusEcMBg7hYU72YRAU1tonhVfFHXj9Amr63rfH_bl7N/exec"; 
         const API_KEY = "SNTE_2026_SECRET_KEY";
 
-        // توليد قائمة الولايات
-        const wilayas = ["أدرار", "الشلف", "الأغواط", "أم البواقي", "باتنة", "بجاية", "بسكرة", "بشار", "البليدة", "البويرة", "تمنراست", "تبسة", "تلمسان", "تيارت", "تيزي وزو", "الجزائر", "الجلفة", "جيجل", "سطيف", "سعيدة", "سكيكدة", "سيدي بلعباس", "عنابة", "قالمة", "قسنطينة", "المدية", "مستغانم", "المسيلة", "معسكر", "ورقلة", "وهران", "البيض", "إليزي", "برج بوعريريج", "بومرداس", "الطارف", "تندوف", "تسمسيلت", "الوادي", "خنشلة", "سوق أهراس", "تيبازة", "ميلة", "عين الدفلى", "النعامة", "عين تموشنت", "غرداية", "غليزان", "تيميمون", "برج باجي مختار", "أولاد جلال", "بني عباس", "إن صالح", "إن قزام", "تقرت", "جانت", "المغير", "المنيعة"];
+        // القائمة الشاملة لـ 69 فرع نقابي
+        const wilayas = [
+            {c: "01", n: "أدرار"}, {c: "02", n: "الشلف"}, {c: "03", n: "الأغواط"}, {c: "04", n: "أم البواقي"}, {c: "05", n: "باتنة"},
+            {c: "06", n: "بجاية"}, {c: "07", n: "بسكرة"}, {c: "08", n: "بشار"}, {c: "09", n: "البليدة"}, {c: "10", n: "البويرة"},
+            {c: "11", n: "تمنراست"}, {c: "12", n: "تبسة"}, {c: "13", n: "تلمسان"}, {c: "14", n: "تيارت"}, {c: "15", n: "تيزي وزو"},
+            {c: "16-1", n: "الجزائر شرق"}, {c: "16-2", n: "الجزائر وسط"}, {c: "16-3", n: "الجزائر غرب"},
+            {c: "17", n: "الجلفة"}, {c: "18", n: "جيجل"}, {c: "19", n: "سطيف"}, {c: "20", n: "سعيدة"},
+            {c: "21", n: "سكيكدة"}, {c: "22", n: "سيدي بلعباس"}, {c: "23", n: "عنابة"}, {c: "24", n: "قالمة"},
+            {c: "25", n: "قسنطينة"}, {c: "26", n: "المدية"}, {c: "27", n: "مستغانم"}, {c: "28", n: "المسيلة"},
+            {c: "29", n: "معسكر"}, {c: "30", n: "ورقلة"}, {c: "31", n: "وهران"}, {c: "32", n: "البيض"},
+            {c: "33", n: "إليزي"}, {c: "34", n: "برج بوعريريج"}, {c: "35", n: "بومرداس"}, {c: "36", n: "الطارف"},
+            {c: "37", n: "تندوف"}, {c: "38", n: "تسمسيلت"}, {c: "39", n: "الوادي"}, {c: "40", n: "خنشلة"},
+            {c: "41", n: "سوق أهراس"}, {c: "42", n: "تيبازة"}, {c: "43", n: "ميلة"}, {c: "44", n: "عين الدفلى"},
+            {c: "45", n: "النعامة"}, {c: "46", n: "عين تموشنت"}, {c: "47", n: "غرداية"}, {c: "48", n: "غليزان"},
+            {c: "49", n: "تيميمون"}, {c: "50", n: "برج باجي مختار"}, {c: "51", n: "بني عباس"}, {c: "52", n: "أولاد جلال"},
+            {c: "53", n: "عين صالح"}, {c: "54", n: "عين قزام"}, {c: "55", n: "تقرت"}, {c: "56", n: "جانت"},
+            {c: "57", n: "المغير"}, {c: "58", n: "المنيعة"}, {c: "59", n: "آفلو"}, {c: "60", n: "بريكة"},
+            {c: "61", n: "القنطرة"}, {c: "62", n: "بير العاتر"}, {c: "63", n: "العريشة"}, {c: "64", n: "قصر الشلالة"},
+            {c: "65", n: "عين وسارة"}, {c: "66", n: "مسعد"}, {c: "67", n: "قصر البخاري"}, {c: "68", n: "بوسعادة"},
+            {c: "69", n: "الأبيض سيدي الشيخ"}
+        ];
+
         const wilayaSelect = document.getElementById('wilayaCode');
-        wilayas.forEach((w, i) => {
-            const code = (i + 1).toString().padStart(2, '0');
+        wilayas.forEach(w => {
             const option = document.createElement('option');
-            option.value = code; option.text = `${code} - ${w}`;
-            if (code === "17") option.selected = true;
+            option.value = w.c; 
+            option.text = `${w.c} - ${w.n}`;
+            if (w.c === "17") option.selected = true; 
             wilayaSelect.appendChild(option);
         });
 
-        // دالة إظهار/إخفاء حقل رقم الوصل
         function toggleReceiptField() {
             const method = document.getElementById('payMethod').value;
             const receiptGroup = document.getElementById('receiptGroup');
@@ -248,7 +267,7 @@
             formData.append('wilayaCode', wilayaCode);
             formData.append('subType', subType);
             formData.append('payMethod', payMethod);
-            formData.append('receiptNum', receiptNum); // إرسال رقم الوصل
+            formData.append('receiptNum', receiptNum); 
 
             fetch(WEB_APP_URL, { method: 'POST', body: formData, mode: 'cors' })
             .then(res => res.json())
@@ -269,7 +288,9 @@
 
         function generateCardUI(name, rank, workplace, role, municipality, wilayaCode, subType, payMethod, smartId, expiryDate) {
             let subText = subType === "01" ? "انخراط (200 دج)" : subType === "02" ? "خدمات (500 دج)" : "اشتراك وخدمات (700 دج)";
-            const wilayaName = wilayas[parseInt(wilayaCode) - 1];
+            
+            const wilayaObj = wilayas.find(w => w.c === wilayaCode);
+            const wilayaName = wilayaObj ? wilayaObj.n : "";
 
             document.getElementById('cardName').innerText = name;
             document.getElementById('cardRank').innerText = rank;
@@ -285,10 +306,10 @@
 
             if(payMethod === 'cash') {
                 badge.innerText = "غير مسدد (نقداً)";
-                instruction.style.display = 'none'; // إخفاء رسالة الإيميل
+                instruction.style.display = 'none'; 
             } else {
                 badge.innerText = "في انتظار التأكيد";
-                instruction.style.display = 'block'; // إظهار رسالة الإيميل
+                instruction.style.display = 'block'; 
             }
 
             document.getElementById('qrcode').innerHTML = ""; 

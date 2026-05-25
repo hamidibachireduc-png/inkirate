@@ -3,158 +3,306 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>التدقيق الأمني - S.N.T.E</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>تطبيق إصدار بطاقة الانخراط - S.N.T.E</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         :root {
             --primary: #1b5e20;
             --gold: #d4af37;
             --red: #c62828;
-            --green-success: #2e7d32;
-            --bg: #f4f7f6;
+            --bg: #f0f4f1;
         }
         body { font-family: 'Arial', Tahoma, sans-serif; background-color: var(--bg); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .form-container { background-color: white; padding: 25px; border-radius: 12px; border-top: 5px solid var(--primary); box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 500px; margin-bottom: 30px; }
+        .app-header { text-align: center; margin-bottom: 20px; }
+        .app-header img { width: 100px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)); }
+        .app-header h2 { color: var(--primary); margin: 10px 0 0 0; font-size: 22px; }
         
-        .verify-container { background-color: white; padding: 30px 20px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 100%; max-width: 450px; text-align: center; border-top: 5px solid var(--primary); }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: #333; font-size: 13px; }
+        input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
+        input:focus, select:focus { outline: none; border-color: var(--primary); }
         
-        .app-header img { width: 90px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)); margin-bottom: 10px; }
-        .app-header h2 { color: var(--primary); margin: 0 0 5px 0; font-size: 20px; }
-        .app-header p { color: #666; font-size: 13px; margin: 0 0 20px 0; }
+        button.btn-generate { width: 100%; padding: 12px; background-color: var(--primary); color: white; border: none; border-radius: 6px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; }
+        button.btn-generate:hover { background-color: #124016; }
+        button:disabled { background-color: #999; cursor: not-allowed; }
+
+        .loader { display: none; text-align: center; color: var(--primary); font-weight: bold; margin-top: 10px; font-size: 14px; }
+
+        /* تصميم البطاقة الذكية */
+        .smart-card-wrapper { display: none; width: 100%; max-width: 450px; }
+        .smart-card { background: url('https://www.transparenttextures.com/patterns/cubes.png'), linear-gradient(135deg, #ffffff, #f1f8f2); color: #111; width: 100%; border-radius: 12px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); position: relative; box-sizing: border-box; border: 2px solid var(--primary); overflow: hidden; }
+        .smart-card::before { content: ""; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 250px; height: 250px; background-image: url('https://a.top4top.io/p_3797pbgxl0.png'); background-size: contain; background-repeat: no-repeat; opacity: 0.08; z-index: 0; }
+        .card-content { position: relative; z-index: 1; }
+        .card-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--gold); padding-bottom: 10px; margin-bottom: 15px; }
+        .card-title { text-align: center; flex-grow: 1; }
+        .card-title h3 { margin: 0; color: var(--primary); font-size: 18px; font-weight: 900; }
+        .card-title p { margin: 0; font-size: 11px; color: #333; font-weight: bold; }
+        .logo-placeholder img { width: 60px; height: auto; }
+        .info-grid { display: grid; grid-template-columns: 1fr; gap: 8px; font-size: 15px; font-weight: bold; }
+        .info-row { display: flex; border-bottom: 1px dashed #ccc; padding-bottom: 5px; }
+        .info-label { color: var(--primary); width: 110px; flex-shrink: 0; }
+        .info-value { color: #111; flex-grow: 1; }
         
-        /* حالات التحميل والنتائج */
-        #loadingState, #resultState, #errorState { display: none; }
-        
-        .loader { border: 5px solid #f3f3f3; border-top: 5px solid var(--primary); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 20px auto; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        
-        .status-icon { font-size: 60px; margin-bottom: 15px; }
-        .status-valid { color: var(--green-success); }
-        .status-invalid { color: var(--red); }
-        
-        .result-title { font-size: 22px; font-weight: bold; margin-bottom: 20px; }
-        
-        /* جدول عرض البيانات */
-        .data-table { width: 100%; border-collapse: collapse; text-align: right; margin-top: 15px; }
-        .data-table th, .data-table td { padding: 12px 10px; border-bottom: 1px solid #eee; }
-        .data-table th { color: var(--primary); width: 40%; font-size: 14px; }
-        .data-table td { color: #333; font-weight: bold; font-size: 15px; }
-        
-        .payment-badge { padding: 5px 12px; border-radius: 20px; color: white; font-size: 12px; font-weight: bold; display: inline-block; }
-        .paid { background-color: var(--green-success); }
-        .unpaid { background-color: #f59e0b; }
-        
-        .btn-scan { background-color: var(--primary); color: white; border: none; padding: 12px 25px; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 25px; width: 100%; transition: 0.3s; }
-        .btn-scan:hover { background-color: #124016; }
+        .card-footer { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 15px; }
+        .qr-box { background: white; padding: 5px; border: 2px solid var(--primary); border-radius: 6px; }
+        .subscription-details { text-align: left; font-size: 13px; font-weight: bold; }
+        .smart-id { margin-top: 5px; font-family: monospace; font-size: 14px; color: var(--red); text-align: center; letter-spacing: 1px; }
+        .status-badge { position: absolute; top: 15px; left: -35px; background-color: var(--red); color: white; padding: 5px 40px; font-size: 12px; font-weight: bold; transform: rotate(-45deg); box-shadow: 0 2px 4px rgba(0,0,0,0.3); text-align: center; }
+
+        .action-buttons { display: flex; gap: 10px; margin-top: 20px; }
+        .action-buttons button { flex: 1; padding: 10px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        .btn-print { background-color: var(--gold); color: #111; }
+        .btn-new { background-color: #ccc; color: #111; }
     </style>
 </head>
 <body>
 
-    <div class="verify-container">
+    <div class="form-container" id="formContainer">
         <div class="app-header">
             <img src="https://a.top4top.io/p_3797pbgxl0.png" alt="S.N.T.E Logo">
-            <h2>النظام الوطني للتدقيق</h2>
-            <p>النقابة الوطنية لعمال التربية</p>
+            <h2>تسجيل منخرط جديد</h2>
+        </div>
+        
+        <div class="form-group">
+            <label>الاسم واللقب:</label>
+            <input type="text" id="fullName" placeholder="الاسم الكامل" required>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group" style="margin-bottom: 0;">
+                <label>رقم التعريف الوطني (NIN):</label>
+                <input type="text" id="nin" placeholder="18 رقم" required>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label>رقم الضمان الاجتماعي:</label>
+                <input type="text" id="socialSecurity" placeholder="اختياري/إلزامي">
+            </div>
         </div>
 
-        <div id="loadingState">
-            <div class="loader"></div>
-            <h3 style="color: var(--primary);">جاري التحقق من قاعدة البيانات...</h3>
-            <p style="color: #666; font-size: 14px;">يرجى الانتظار</p>
+        <div class="form-row">
+            <div class="form-group" style="margin-bottom: 0;">
+                <label>الوظيفة / الرتبة:</label>
+                <input type="text" id="rank" placeholder="أستاذ تعليم متوسط..." required>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label>مكان العمل:</label>
+                <input type="text" id="workplace" placeholder="المؤسسة..." required>
+            </div>
         </div>
 
-        <div id="resultState">
-            <i class="fa-solid fa-circle-check status-icon status-valid"></i>
-            <div class="result-title status-valid">بطاقة نقابية معتمدة</div>
-            
-            <table class="data-table">
-                <tr><th>الاسم واللقب:</th><td id="resName">---</td></tr>
-                <tr><th>رقم الانخراط:</th><td id="resId" style="font-family: monospace; color: var(--red);">---</td></tr>
-                <tr><th>الوظيفة:</th><td id="resRank">---</td></tr>
-                <tr><th>الفرع النقابي:</th><td id="resBranch">---</td></tr>
-                <tr><th>الصفة:</th><td id="resRole">---</td></tr>
-                <tr><th>حالة التسديد:</th><td><span id="resPayment" class="payment-badge">---</span></td></tr>
-                <tr><th>صلاحية البطاقة:</th><td id="resExpiry" style="direction: ltr; text-align: right;">---</td></tr>
-            </table>
+        <div class="form-row">
+            <div class="form-group" style="margin-bottom: 0;">
+                <label>الولاية:</label>
+                <select id="wilayaCode">
+                    </select>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label>البلدية:</label>
+                <input type="text" id="municipality" placeholder="اسم البلدية" required>
+            </div>
         </div>
 
-        <div id="errorState">
-            <i class="fa-solid fa-triangle-exclamation status-icon status-invalid"></i>
-            <div class="result-title status-invalid">بطاقة غير صالحة !</div>
-            <p style="color: #555; line-height: 1.6;" id="errorMessage">لم يتم العثور على هذا الرقم في السجل الوطني للمنخرطين. قد تكون البطاقة مزورة أو تم سحبها.</p>
+        <div class="form-group">
+            <label>الصفة النقابية:</label>
+            <input type="text" id="unionRole" placeholder="منخرط، أمين فرع..." required>
         </div>
 
-        <button class="btn-scan" id="newScanBtn" onclick="window.location.href='index.html'" style="display: none;">العودة للصفحة الرئيسية</button>
+        <div class="form-row">
+            <div class="form-group" style="margin-bottom: 0;">
+                <label>نوع الاشتراك:</label>
+                <select id="subType">
+                    <option value="01">انخراط (200 دج)</option>
+                    <option value="02">خدمات (500 دج)</option>
+                    <option value="03">انخراط + خدمات (700 دج)</option>
+                </select>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label>طريقة الدفع:</label>
+                <select id="payMethod">
+                    <option value="edahabia">ذهبية (مسدد)</option>
+                    <option value="cash">نقداً (Cash)</option>
+                </select>
+            </div>
+        </div>
+
+        <button class="btn-generate" id="submitBtn" onclick="submitData()">حفظ وإصدار البطاقة</button>
+        <div class="loader" id="loader">جاري الاتصال بقاعدة البيانات... الرجاء الانتظار قليلاً</div>
+    </div>
+
+    <div class="smart-card-wrapper" id="smartCardWrapper">
+        <div class="smart-card" id="smartCard">
+            <div class="status-badge" id="paymentStatus">مسدد</div>
+            <div class="card-content">
+                <div class="card-header">
+                    <div class="logo-placeholder"><img src="https://a.top4top.io/p_3797pbgxl0.png" alt="شعار"></div>
+                    <div class="card-title">
+                        <h3>النقابة الوطنية لعمال التربية</h3>
+                        <p>SYNDICAT NATIONAL DES TRAVAILLEURS DE L'EDUCATION</p>
+                        <h4 style="margin: 5px 0 0 0; color: #111;">بطاقة انخراط</h4>
+                    </div>
+                    <div class="logo-placeholder"><img src="https://a.top4top.io/p_3797pbgxl0.png" alt="شعار"></div>
+                </div>
+
+                <div class="info-grid">
+                    <div class="info-row"><div class="info-label">الإسم واللقب:</div><div class="info-value" id="cardName">---</div></div>
+                    <div class="info-row"><div class="info-label">الوظيفة:</div><div class="info-value" id="cardRank">---</div></div>
+                    <div class="info-row"><div class="info-label">مكان العمل:</div><div class="info-value" id="cardWorkplace">---</div></div>
+                    <div class="info-row"><div class="info-label">الصفة النقابية:</div><div class="info-value" id="cardRole">---</div></div>
+                    <div class="info-row"><div class="info-label">الفرع المحلي:</div><div class="info-value" id="cardBranch">---</div></div>
+                </div>
+
+                <div class="card-footer">
+                    <div>
+                        <div class="qr-box" id="qrcode"></div>
+                        <div class="smart-id" id="cardId">Nº ---</div>
+                    </div>
+                    <div class="subscription-details">
+                        <p style="margin: 0 0 5px 0; color: var(--primary);" id="cardExpiry">صالحة لغاية: ---</p>
+                        <p style="margin: 0;" id="cardSub">الاشتراك: ---</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="action-buttons">
+            <button class="btn-print" onclick="window.print()">طباعة البطاقة</button>
+            <button class="btn-new" onclick="location.reload()">تسجيل جديد</button>
+        </div>
     </div>
 
     <script>
-        // رابط الـ Web App الخاص بك (نفس الرابط الذي استخدمناه في صفحة التسجيل)
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzcqjD7W_oGS6YC3n08nh-R-fusEcMBg7hYU72YRAU1tonhVfFHXj9Amr63rfH_bl7N/exec";
+        // رابط قاعدة البيانات الخاص بك
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzcqjD7W_oGS6YC3n08nh-R-fusEcMBg7hYU72YRAU1tonhVfFHXj9Amr63rfH_bl7N/exec"; 
+        
+        // مفتاح الأمان للاتصال
+        const API_KEY = "SNTE_2026_SECRET_KEY";
 
-        // استخراج "رقم الانخراط" من رابط الصفحة (مثال: ?id=2026-17-01-0005)
-        const urlParams = new URLSearchParams(window.location.search);
-        const checkId = urlParams.get('id');
+        // توليد قائمة ولايات الجزائر 58 تلقائياً
+        const wilayas = [
+            "أدرار", "الشلف", "الأغواط", "أم البواقي", "باتنة", "بجاية", "بسكرة", "بشار", "البليدة", "البويرة", 
+            "تمنراست", "تبسة", "تلمسان", "تيارت", "تيزي وزو", "الجزائر", "الجلفة", "جيجل", "سطيف", "سعيدة", 
+            "سكيكدة", "سيدي بلعباس", "عنابة", "قالمة", "قسنطينة", "المدية", "مستغانم", "المسيلة", "معسكر", "ورقلة", 
+            "وهران", "البيض", "إليزي", "برج بوعريريج", "بومرداس", "الطارف", "تندوف", "تسمسيلت", "الوادي", "خنشلة", 
+            "سوق أهراس", "تيبازة", "ميلة", "عين الدفلى", "النعامة", "عين تموشنت", "غرداية", "غليزان", "تيميمون", "برج باجي مختار", 
+            "أولاد جلال", "بني عباس", "إن صالح", "إن قزام", "تقرت", "جانت", "المغير", "المنيعة"
+        ];
+        
+        const wilayaSelect = document.getElementById('wilayaCode');
+        wilayas.forEach((wilaya, index) => {
+            const code = (index + 1).toString().padStart(2, '0');
+            const option = document.createElement('option');
+            option.value = code;
+            option.text = `${code} - ${wilaya}`;
+            if (code === "17") option.selected = true; // تحديد ولاية الجلفة افتراضياً
+            wilayaSelect.appendChild(option);
+        });
 
-        window.onload = function() {
-            if (checkId) {
-                verifyCard(checkId);
-            } else {
-                showError("لم يتم تمرير أي رقم للتحقق. يرجى مسح رمز الـ QR الخاص بالبطاقة.");
+        // دالة إرسال البيانات
+        function submitData() {
+            const name = document.getElementById('fullName').value;
+            const nin = document.getElementById('nin').value;
+            const socialSecurity = document.getElementById('socialSecurity').value;
+            const rank = document.getElementById('rank').value;
+            const workplace = document.getElementById('workplace').value;
+            const unionRole = document.getElementById('unionRole').value;
+            const municipality = document.getElementById('municipality').value;
+            const wilayaCode = document.getElementById('wilayaCode').value;
+            const subType = document.getElementById('subType').value;
+            const payMethod = document.getElementById('payMethod').value;
+
+            if(!name || !nin || !rank || !workplace || !municipality) {
+                alert("يرجى ملء كافة الحقول الإلزامية لتوليد البطاقة.");
+                return;
             }
-        };
 
-        function verifyCard(id) {
-            // إظهار واجهة التحميل
-            document.getElementById('loadingState').style.display = 'block';
-            document.getElementById('resultState').style.display = 'none';
-            document.getElementById('errorState').style.display = 'none';
+            document.getElementById('submitBtn').disabled = true;
+            document.getElementById('loader').style.display = 'block';
 
-            // إرسال طلب فحص لقاعدة البيانات
-            fetch(WEB_APP_URL + "?id=" + id)
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById('loadingState').style.display = 'none';
-                    
-                    if (data.status === "valid") {
-                        showSuccess(data);
-                    } else {
-                        showError(data.message);
-                    }
-                })
-                .catch(error => {
-                    document.getElementById('loadingState').style.display = 'none';
-                    showError("حدث خطأ في الاتصال بالسيرفر. تأكد من جودة اتصال الإنترنت.");
-                    console.error("Error:", error);
-                });
+            const formData = new URLSearchParams();
+            formData.append('apiKey', API_KEY);
+            formData.append('name', name);
+            formData.append('nin', nin);
+            formData.append('socialSecurity', socialSecurity);
+            formData.append('rank', rank);
+            formData.append('workplace', workplace);
+            formData.append('role', unionRole);
+            formData.append('municipality', municipality);
+            formData.append('wilayaCode', wilayaCode);
+            formData.append('subType', subType);
+            formData.append('payMethod', payMethod);
+
+            fetch(WEB_APP_URL, {
+                method: 'POST',
+                body: formData,
+                mode: 'cors'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.status === "success") {
+                    generateCardUI(name, rank, workplace, unionRole, municipality, wilayaCode, subType, payMethod, data.smartId, data.expiryDate);
+                } else {
+                    alert("عذراً، حدث خطأ: " + data.message);
+                    resetButton();
+                }
+            })
+            .catch(error => {
+                // تجاوز الطوارئ في حال فشل الاتصال لضمان إصدار البطاقة
+                console.error('Connection Error:', error);
+                const tempSerial = Math.floor(1000 + Math.random() * 9000);
+                const tempId = `2026-${wilayaCode}-${subType}-0${tempSerial}`;
+                const tempExpiry = "2027-05-25";
+                generateCardUI(name, rank, workplace, unionRole, municipality, wilayaCode, subType, payMethod, tempId, tempExpiry);
+                alert("تنبيه: تم إنشاء البطاقة محلياً، يرجى التأكد من اتصال الإنترنت لتسجيلها في قاعدة البيانات السحابية.");
+            });
         }
 
-        function showSuccess(data) {
-            document.getElementById('resultState').style.display = 'block';
-            document.getElementById('newScanBtn').style.display = 'block';
-            
-            document.getElementById('resName').innerText = data.name;
-            document.getElementById('resId').innerText = data.id;
-            document.getElementById('resRank').innerText = data.rank;
-            document.getElementById('resBranch').innerText = data.municipality;
-            document.getElementById('resRole').innerText = data.role;
-            document.getElementById('resExpiry').innerText = data.expiryDate;
-            
-            const paymentBadge = document.getElementById('resPayment');
-            paymentBadge.innerText = data.paymentStatus;
-            
-            // تلوين شارة الدفع حسب الحالة
-            if (data.paymentStatus.includes("مسدد")) {
-                paymentBadge.className = "payment-badge paid";
+        // دالة رسم البطاقة الذكية
+        function generateCardUI(name, rank, workplace, role, municipality, wilayaCode, subType, payMethod, smartId, expiryDate) {
+            let subText = "";
+            if(subType === "01") subText = "انخراط (200 دج)";
+            else if(subType === "02") subText = "خدمات (500 دج)";
+            else subText = "اشتراك وخدمات (700 دج)";
+
+            const wilayaName = wilayas[parseInt(wilayaCode) - 1];
+
+            document.getElementById('cardName').innerText = name;
+            document.getElementById('cardRank').innerText = rank;
+            document.getElementById('cardWorkplace').innerText = workplace;
+            document.getElementById('cardRole').innerText = role;
+            document.getElementById('cardBranch').innerText = municipality + " (ولاية " + wilayaName + ")";
+            document.getElementById('cardSub').innerText = subText;
+            document.getElementById('cardId').innerText = smartId;
+            document.getElementById('cardExpiry').innerText = "صالحة لغاية: " + expiryDate;
+
+            const badge = document.getElementById('paymentStatus');
+            if(payMethod === 'cash') {
+                badge.innerText = "قيد الانتظار";
+                badge.style.backgroundColor = "#f59e0b"; 
             } else {
-                paymentBadge.className = "payment-badge unpaid";
+                badge.innerText = "مسدد (الذهبية)";
+                badge.style.backgroundColor = "var(--primary)"; 
             }
+
+            document.getElementById('qrcode').innerHTML = ""; 
+            // رابط التحقق الذي يقرأه الـ QR Code
+            new QRCode(document.getElementById("qrcode"), {
+                text: "https://snte-verify.netlify.app/?id=" + smartId, 
+                width: 75,
+                height: 75,
+                colorDark : "#1b5e20",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.L
+            });
+
+            document.getElementById('formContainer').style.display = 'none';
+            document.getElementById('smartCardWrapper').style.display = 'block';
         }
 
-        function showError(message) {
-            document.getElementById('errorState').style.display = 'block';
-            document.getElementById('newScanBtn').style.display = 'block';
-            if(message) {
-                document.getElementById('errorMessage').innerText = message;
-            }
+        function resetButton() {
+            document.getElementById('submitBtn').disabled = false;
+            document.getElementById('loader').style.display = 'none';
         }
     </script>
 </body>

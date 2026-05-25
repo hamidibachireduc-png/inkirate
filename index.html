@@ -30,4 +30,278 @@
         .smart-card { background: url('https://www.transparenttextures.com/patterns/cubes.png'), linear-gradient(135deg, #ffffff, #f1f8f2); color: #111; width: 100%; border-radius: 12px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); position: relative; box-sizing: border-box; border: 2px solid var(--primary); overflow: hidden; }
         .smart-card::before { content: ""; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 250px; height: 250px; background-image: url('https://a.top4top.io/p_3797pbgxl0.png'); background-size: contain; background-repeat: no-repeat; opacity: 0.08; z-index: 0; }
         .card-content { position: relative; z-index: 1; }
-        .card-header { display: flex; justify-content
+        .card-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--gold); padding-bottom: 10px; margin-bottom: 15px; }
+        .card-title { text-align: center; flex-grow: 1; }
+        .card-title h3 { margin: 0; color: var(--primary); font-size: 18px; font-weight: 900; }
+        .card-title p { margin: 0; font-size: 11px; color: #333; font-weight: bold; }
+        .logo-placeholder img { width: 60px; height: auto; }
+        .info-grid { display: grid; grid-template-columns: 1fr; gap: 8px; font-size: 15px; font-weight: bold; }
+        .info-row { display: flex; border-bottom: 1px dashed #ccc; padding-bottom: 5px; }
+        .info-label { color: var(--primary); width: 110px; flex-shrink: 0; }
+        .info-value { color: #111; flex-grow: 1; }
+        
+        .card-footer { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 15px; }
+        .qr-box { background: white; padding: 5px; border: 2px solid var(--primary); border-radius: 6px; }
+        .subscription-details { text-align: left; font-size: 13px; font-weight: bold; }
+        .smart-id { margin-top: 5px; font-family: monospace; font-size: 14px; color: var(--red); text-align: center; letter-spacing: 1px; }
+        .status-badge { position: absolute; top: 15px; left: -35px; background-color: #f59e0b; color: white; padding: 5px 40px; font-size: 11px; font-weight: bold; transform: rotate(-45deg); box-shadow: 0 2px 4px rgba(0,0,0,0.3); text-align: center; }
+
+        .email-instruction { background-color: #fff3cd; border-right: 5px solid #ffc107; padding: 15px; margin-top: 20px; border-radius: 6px; font-size: 14px; color: #856404; font-weight: bold; line-height: 1.5; display: none; }
+
+        .action-buttons { display: flex; gap: 10px; margin-top: 20px; }
+        .action-buttons button { flex: 1; padding: 10px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        .btn-print { background-color: var(--gold); color: #111; }
+        .btn-new { background-color: #ccc; color: #111; }
+    </style>
+</head>
+<body>
+
+    <div class="form-container" id="formContainer">
+        <div class="app-header">
+            <img src="https://a.top4top.io/p_3797pbgxl0.png" alt="S.N.T.E Logo">
+            <h2>تسجيل منخرط جديد</h2>
+        </div>
+        
+        <div class="form-group">
+            <label>الاسم واللقب:</label>
+            <input type="text" id="fullName" placeholder="الاسم الكامل" required>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group" style="margin-bottom: 0;">
+                <label>رقم التعريف الوطني (NIN):</label>
+                <input type="text" id="nin" placeholder="18 رقم" required>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label>رقم الضمان الاجتماعي:</label>
+                <input type="text" id="socialSecurity" placeholder="اختياري/إلزامي">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group" style="margin-bottom: 0;">
+                <label>الوظيفة / الرتبة:</label>
+                <input type="text" id="rank" placeholder="أستاذ تعليم متوسط..." required>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label>مكان العمل:</label>
+                <input type="text" id="workplace" placeholder="المؤسسة..." required>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group" style="margin-bottom: 0;">
+                <label>الولاية:</label>
+                <select id="wilayaCode">
+                    </select>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label>البلدية:</label>
+                <input type="text" id="municipality" placeholder="اسم البلدية" required>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>الصفة النقابية:</label>
+            <input type="text" id="unionRole" placeholder="منخرط، أمين فرع..." required>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group" style="margin-bottom: 0;">
+                <label>نوع الاشتراك:</label>
+                <select id="subType">
+                    <option value="01">انخراط (200 دج)</option>
+                    <option value="02">خدمات (500 دج)</option>
+                    <option value="03">انخراط + خدمات (700 دج)</option>
+                </select>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label>طريقة الدفع:</label>
+                <select id="payMethod" onchange="toggleReceiptField()">
+                    <option value="edahabia">البطاقة الذهبية</option>
+                    <option value="cash">دفع نقدي (Cash)</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group" id="receiptGroup">
+            <label style="color: var(--primary);">رقم عملية الدفع (BaridiMob Reference):</label>
+            <input type="text" id="receiptNum" placeholder="أدخل رقم العملية الموجود في الوصل" required>
+        </div>
+
+        <button class="btn-generate" id="submitBtn" onclick="submitData()">حفظ وإصدار البطاقة</button>
+        <div class="loader" id="loader">جاري الاتصال بقاعدة البيانات... الرجاء الانتظار قليلاً</div>
+    </div>
+
+    <div class="smart-card-wrapper" id="smartCardWrapper">
+        <div class="smart-card" id="smartCard">
+            <div class="status-badge" id="paymentStatus">في انتظار التأكيد</div>
+            <div class="card-content">
+                <div class="card-header">
+                    <div class="logo-placeholder"><img src="https://a.top4top.io/p_3797pbgxl0.png" alt="شعار"></div>
+                    <div class="card-title">
+                        <h3>النقابة الوطنية لعمال التربية</h3>
+                        <p>SYNDICAT NATIONAL DES TRAVAILLEURS DE L'EDUCATION</p>
+                        <h4 style="margin: 5px 0 0 0; color: #111;">بطاقة انخراط</h4>
+                    </div>
+                    <div class="logo-placeholder"><img src="https://a.top4top.io/p_3797pbgxl0.png" alt="شعار"></div>
+                </div>
+
+                <div class="info-grid">
+                    <div class="info-row"><div class="info-label">الإسم واللقب:</div><div class="info-value" id="cardName">---</div></div>
+                    <div class="info-row"><div class="info-label">الوظيفة:</div><div class="info-value" id="cardRank">---</div></div>
+                    <div class="info-row"><div class="info-label">مكان العمل:</div><div class="info-value" id="cardWorkplace">---</div></div>
+                    <div class="info-row"><div class="info-label">الصفة النقابية:</div><div class="info-value" id="cardRole">---</div></div>
+                    <div class="info-row"><div class="info-label">الفرع المحلي:</div><div class="info-value" id="cardBranch">---</div></div>
+                </div>
+
+                <div class="card-footer">
+                    <div>
+                        <div class="qr-box" id="qrcode"></div>
+                        <div class="smart-id" id="cardId">Nº ---</div>
+                    </div>
+                    <div class="subscription-details">
+                        <p style="margin: 0 0 5px 0; color: var(--primary);" id="cardExpiry">صالحة لغاية: ---</p>
+                        <p style="margin: 0;" id="cardSub">الاشتراك: ---</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="email-instruction" id="emailInstruction">
+            ⚠️ لتفعيل بطاقتك رسمياً، يرجى إرسال "وصل بريدي موب" عبر الإيميل إلى:<br>
+            <span style="color: var(--primary); font-size: 16px; display: block; margin: 8px 0; direction: ltr;">paiementsnte@gmail.com</span>
+            مع كتابة (رقم انخراطك الذكي أعلاه) في موضوع الرسالة.
+        </div>
+
+        <div class="action-buttons">
+            <button class="btn-print" onclick="window.print()">طباعة البطاقة</button>
+            <button class="btn-new" onclick="location.reload()">تسجيل جديد</button>
+        </div>
+    </div>
+
+    <script>
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzcqjD7W_oGS6YC3n08nh-R-fusEcMBg7hYU72YRAU1tonhVfFHXj9Amr63rfH_bl7N/exec"; 
+        const API_KEY = "SNTE_2026_SECRET_KEY";
+
+        // توليد قائمة الولايات
+        const wilayas = ["أدرار", "الشلف", "الأغواط", "أم البواقي", "باتنة", "بجاية", "بسكرة", "بشار", "البليدة", "البويرة", "تمنراست", "تبسة", "تلمسان", "تيارت", "تيزي وزو", "الجزائر", "الجلفة", "جيجل", "سطيف", "سعيدة", "سكيكدة", "سيدي بلعباس", "عنابة", "قالمة", "قسنطينة", "المدية", "مستغانم", "المسيلة", "معسكر", "ورقلة", "وهران", "البيض", "إليزي", "برج بوعريريج", "بومرداس", "الطارف", "تندوف", "تسمسيلت", "الوادي", "خنشلة", "سوق أهراس", "تيبازة", "ميلة", "عين الدفلى", "النعامة", "عين تموشنت", "غرداية", "غليزان", "تيميمون", "برج باجي مختار", "أولاد جلال", "بني عباس", "إن صالح", "إن قزام", "تقرت", "جانت", "المغير", "المنيعة"];
+        const wilayaSelect = document.getElementById('wilayaCode');
+        wilayas.forEach((w, i) => {
+            const code = (i + 1).toString().padStart(2, '0');
+            const option = document.createElement('option');
+            option.value = code; option.text = `${code} - ${w}`;
+            if (code === "17") option.selected = true;
+            wilayaSelect.appendChild(option);
+        });
+
+        // دالة إظهار/إخفاء حقل رقم الوصل
+        function toggleReceiptField() {
+            const method = document.getElementById('payMethod').value;
+            const receiptGroup = document.getElementById('receiptGroup');
+            const receiptInput = document.getElementById('receiptNum');
+            
+            if(method === 'edahabia') {
+                receiptGroup.style.display = 'block';
+                receiptInput.required = true;
+            } else {
+                receiptGroup.style.display = 'none';
+                receiptInput.required = false;
+                receiptInput.value = ""; 
+            }
+        }
+
+        function submitData() {
+            const name = document.getElementById('fullName').value;
+            const nin = document.getElementById('nin').value;
+            const socialSecurity = document.getElementById('socialSecurity').value;
+            const rank = document.getElementById('rank').value;
+            const workplace = document.getElementById('workplace').value;
+            const unionRole = document.getElementById('unionRole').value;
+            const municipality = document.getElementById('municipality').value;
+            const wilayaCode = document.getElementById('wilayaCode').value;
+            const subType = document.getElementById('subType').value;
+            const payMethod = document.getElementById('payMethod').value;
+            const receiptNum = document.getElementById('receiptNum').value;
+
+            if(!name || !nin || !rank || !workplace || !municipality) {
+                alert("يرجى ملء كافة الحقول الإلزامية.");
+                return;
+            }
+            if(payMethod === 'edahabia' && !receiptNum) {
+                alert("يرجى إدخال رقم عملية الدفع الموجود في الوصل.");
+                return;
+            }
+
+            document.getElementById('submitBtn').disabled = true;
+            document.getElementById('loader').style.display = 'block';
+
+            const formData = new URLSearchParams();
+            formData.append('apiKey', API_KEY);
+            formData.append('name', name);
+            formData.append('nin', nin);
+            formData.append('socialSecurity', socialSecurity);
+            formData.append('rank', rank);
+            formData.append('workplace', workplace);
+            formData.append('role', unionRole);
+            formData.append('municipality', municipality);
+            formData.append('wilayaCode', wilayaCode);
+            formData.append('subType', subType);
+            formData.append('payMethod', payMethod);
+            formData.append('receiptNum', receiptNum); // إرسال رقم الوصل
+
+            fetch(WEB_APP_URL, { method: 'POST', body: formData, mode: 'cors' })
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === "success") {
+                    generateCardUI(name, rank, workplace, unionRole, municipality, wilayaCode, subType, payMethod, data.smartId, data.expiryDate);
+                } else {
+                    alert("عذراً، حدث خطأ: " + data.message);
+                    resetButton();
+                }
+            })
+            .catch(error => {
+                const tempId = `2026-${wilayaCode}-${subType}-0999`;
+                generateCardUI(name, rank, workplace, unionRole, municipality, wilayaCode, subType, payMethod, tempId, "2027-05-25");
+                alert("تم إنشاء البطاقة محلياً.");
+            });
+        }
+
+        function generateCardUI(name, rank, workplace, role, municipality, wilayaCode, subType, payMethod, smartId, expiryDate) {
+            let subText = subType === "01" ? "انخراط (200 دج)" : subType === "02" ? "خدمات (500 دج)" : "اشتراك وخدمات (700 دج)";
+            const wilayaName = wilayas[parseInt(wilayaCode) - 1];
+
+            document.getElementById('cardName').innerText = name;
+            document.getElementById('cardRank').innerText = rank;
+            document.getElementById('cardWorkplace').innerText = workplace;
+            document.getElementById('cardRole').innerText = role;
+            document.getElementById('cardBranch').innerText = municipality + " (" + wilayaName + ")";
+            document.getElementById('cardSub').innerText = subText;
+            document.getElementById('cardId').innerText = smartId;
+            document.getElementById('cardExpiry').innerText = "صالحة لغاية: " + expiryDate;
+
+            const badge = document.getElementById('paymentStatus');
+            const instruction = document.getElementById('emailInstruction');
+
+            if(payMethod === 'cash') {
+                badge.innerText = "غير مسدد (نقداً)";
+                instruction.style.display = 'none'; // إخفاء رسالة الإيميل
+            } else {
+                badge.innerText = "في انتظار التأكيد";
+                instruction.style.display = 'block'; // إظهار رسالة الإيميل
+            }
+
+            document.getElementById('qrcode').innerHTML = ""; 
+            new QRCode(document.getElementById("qrcode"), {
+                text: "https://snte-verify.netlify.app/?id=" + smartId, 
+                width: 75, height: 75, colorDark : "#1b5e20", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.L
+            });
+
+            document.getElementById('formContainer').style.display = 'none';
+            document.getElementById('smartCardWrapper').style.display = 'block';
+        }
+
+        function resetButton() { document.getElementById('submitBtn').disabled = false; document.getElementById('loader').style.display = 'none'; }
+    </script>
+</body>
+</html>

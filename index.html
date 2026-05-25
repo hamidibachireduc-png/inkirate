@@ -40,31 +40,37 @@
     </div>
 
     <div id="result">
-        </div>
+    </div>
 </div>
 
 <script>
     // رابط السيرفر الخاص بك (الإكسل)
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxlN1RYe6SM7ZvQh1Gq7zn3BJ3hQhnTHbOFVcfHc7PplSmkhH7erSX3NvzFA6sRUFr9/exec";
     
+    // استخراج رقم البطاقة من الرابط
     const urlParams = new URLSearchParams(window.location.search);
-    const cardId = urlParams.get('id');
+    let cardId = urlParams.get('id');
     
     const loadingDiv = document.getElementById('loading');
     const resultDiv = document.getElementById('result');
 
-    if (!cardId) {
-        showError("لم يتم العثور على رقم البطاقة في الرابط. يرجى مسح الرمز بشكل صحيح.");
+    if (!cardId || cardId.trim() === "") {
+        showError("لم يتم العثور على رقم البطاقة. يرجى مسح رمز الـ QR الخاص بالبطاقة بشكل صحيح.");
     } else {
-        fetch(`${WEB_APP_URL}?id=${cardId}`)
+        cardId = cardId.trim(); // إزالة المسافات الزائدة
+        
+        // إضافة متغير زمني (t) لمنع المتصفح من تخزين النتيجة القديمة (Cache)
+        const noCacheUrl = `${WEB_APP_URL}?id=${cardId}&t=${new Date().getTime()}`;
+
+        fetch(noCacheUrl)
             .then(response => response.json())
             .then(data => {
                 loadingDiv.style.display = 'none';
                 resultDiv.style.display = 'block';
 
                 if (data.status === "valid") {
-                    // إذا كان في حالة الدفع كلمة "انتظار"، نعطيه تحذير أصفر، وإلا نعطيه الضوء الأخضر
-                    let isPending = data.paymentStatus.includes("انتظار");
+                    // التحقق من حالة الدفع
+                    let isPending = data.paymentStatus && data.paymentStatus.includes("انتظار");
 
                     if (isPending) {
                         showWarning(data);
@@ -72,12 +78,13 @@
                         showSuccess(data);
                     }
                 } else {
-                    showError("بطاقة غير مسجلة أو مزورة!");
+                    showError("هذه البطاقة غير مسجلة في النظام أو أنها مزورة!");
                 }
             })
             .catch(error => {
                 loadingDiv.style.display = 'none';
-                showError("حدث خطأ في الاتصال بقاعدة البيانات. تأكد من الإنترنت.");
+                showError("حدث خطأ في الاتصال. يرجى التحقق من اتصالك بالإنترنت والمحاولة مجدداً.");
+                console.error("Error:", error);
             });
     }
 
@@ -108,7 +115,7 @@
         resultDiv.innerHTML = `
             <div class="status-icon">❌</div>
             <h3 style="color: #dc3545; margin: 0 0 10px 0;">تحذير أمني</h3>
-            <p style="font-weight: bold;">${msg}</p>
+            <p style="font-weight: bold; font-size: 14px; color: #333;">${msg}</p>
         `;
     }
 

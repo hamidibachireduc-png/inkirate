@@ -47,7 +47,9 @@
         .qr-box { background: white; padding: 5px; border: 2px solid var(--primary); border-radius: 6px; }
         .subscription-details { text-align: left; font-size: 13px; font-weight: bold; }
         .smart-id { margin-top: 5px; font-family: monospace; font-size: 14px; color: var(--red); text-align: center; letter-spacing: 1px; }
-        .status-badge { position: absolute; top: 15px; left: -35px; background-color: #f59e0b; color: white; padding: 5px 40px; font-size: 11px; font-weight: bold; transform: rotate(-45deg); box-shadow: 0 2px 4px rgba(0,0,0,0.3); text-align: center; }
+        
+        /* تم تعديل هذا السطر لإخفاء الشارة تماماً من واجهة البطاقة */
+        .status-badge { display: none; }
 
         .email-instruction { background-color: #fff3cd; border-right: 5px solid #ffc107; padding: 15px; margin-top: 20px; border-radius: 6px; font-size: 14px; color: #856404; font-weight: bold; line-height: 1.5; display: none; }
 
@@ -195,7 +197,7 @@
     </div>
 
     <script>
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxlN1RYe6SM7ZvQh1Gq7zn3BJ3hQhnTHbOFVcfHc7PplSmkhH7erSX3NvzFA6sRUFr9/exec"; 
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzcqjD7W_oGS6YC3n08nh-R-fusEcMBg7hYU72YRAU1tonhVfFHXj9Amr63rfH_bl7N/exec"; 
         const API_KEY = "SNTE_2026_SECRET_KEY";
 
         const wilayas = [

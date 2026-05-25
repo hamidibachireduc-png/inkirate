@@ -25,7 +25,10 @@
 
         .loader { display: none; text-align: center; color: var(--primary); font-weight: bold; margin-top: 10px; font-size: 14px; }
 
-        /* البطاقة الذكية والتعليمات */
+        .rip-box { background-color: #e8f5e9; border: 2px dashed var(--primary); padding: 12px; border-radius: 6px; text-align: center; margin-bottom: 15px; }
+        .rip-title { font-size: 12px; color: #333; display: block; margin-bottom: 5px; font-weight: bold; }
+        .rip-number { color: var(--primary); font-size: 18px; font-weight: bold; direction: ltr; letter-spacing: 2px; font-family: monospace; }
+
         .smart-card-wrapper { display: none; width: 100%; max-width: 450px; }
         .smart-card { background: url('https://www.transparenttextures.com/patterns/cubes.png'), linear-gradient(135deg, #ffffff, #f1f8f2); color: #111; width: 100%; border-radius: 12px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); position: relative; box-sizing: border-box; border: 2px solid var(--primary); overflow: hidden; }
         .smart-card::before { content: ""; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 250px; height: 250px; background-image: url('https://a.top4top.io/p_3797pbgxl0.png'); background-size: contain; background-repeat: no-repeat; opacity: 0.08; z-index: 0; }
@@ -92,8 +95,7 @@
         <div class="form-row">
             <div class="form-group" style="margin-bottom: 0;">
                 <label>الأمانة الولائية / الفرع:</label>
-                <select id="wilayaCode">
-                    </select>
+                <select id="wilayaCode"></select>
             </div>
             <div class="form-group" style="margin-bottom: 0;">
                 <label>البلدية:</label>
@@ -124,9 +126,21 @@
             </div>
         </div>
 
-        <div class="form-group" id="receiptGroup">
-            <label style="color: var(--primary);">رقم عملية الدفع (BaridiMob Reference):</label>
-            <input type="text" id="receiptNum" placeholder="أدخل رقم العملية الموجود في الوصل" required>
+        <div id="receiptGroup">
+            <div class="rip-box">
+                <span class="rip-title">يرجى تحويل مبلغ الاشتراك إلى حساب النقابة (RIP):</span>
+                <div class="rip-number" id="snteRip">[أدخل_رقم_الـ_RIP_هنا]</div>
+            </div>
+
+            <div class="form-group">
+                <label style="color: var(--primary);">رقم الحساب البريدي للمنخرط (CCP/RIP):</label>
+                <input type="text" id="subscriberAccount" placeholder="أدخل رقم حسابك (للتأكد من مصدر الدفع)" required>
+            </div>
+
+            <div class="form-group">
+                <label style="color: var(--primary);">رقم عملية الدفع (BaridiMob Reference):</label>
+                <input type="text" id="receiptNum" placeholder="أدخل رقم العملية الموجود في الوصل" required>
+            </div>
         </div>
 
         <button class="btn-generate" id="submitBtn" onclick="submitData()">حفظ وإصدار البطاقة</button>
@@ -184,7 +198,6 @@
         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzcqjD7W_oGS6YC3n08nh-R-fusEcMBg7hYU72YRAU1tonhVfFHXj9Amr63rfH_bl7N/exec"; 
         const API_KEY = "SNTE_2026_SECRET_KEY";
 
-        // القائمة الشاملة لـ 69 فرع نقابي
         const wilayas = [
             {c: "01", n: "أدرار"}, {c: "02", n: "الشلف"}, {c: "03", n: "الأغواط"}, {c: "04", n: "أم البواقي"}, {c: "05", n: "باتنة"},
             {c: "06", n: "بجاية"}, {c: "07", n: "بسكرة"}, {c: "08", n: "بشار"}, {c: "09", n: "البليدة"}, {c: "10", n: "البويرة"},
@@ -215,18 +228,24 @@
             wilayaSelect.appendChild(option);
         });
 
+        document.addEventListener("DOMContentLoaded", toggleReceiptField);
+
         function toggleReceiptField() {
             const method = document.getElementById('payMethod').value;
             const receiptGroup = document.getElementById('receiptGroup');
             const receiptInput = document.getElementById('receiptNum');
+            const subscriberAccountInput = document.getElementById('subscriberAccount');
             
             if(method === 'edahabia') {
                 receiptGroup.style.display = 'block';
                 receiptInput.required = true;
+                subscriberAccountInput.required = true;
             } else {
                 receiptGroup.style.display = 'none';
                 receiptInput.required = false;
+                subscriberAccountInput.required = false;
                 receiptInput.value = ""; 
+                subscriberAccountInput.value = ""; 
             }
         }
 
@@ -242,13 +261,14 @@
             const subType = document.getElementById('subType').value;
             const payMethod = document.getElementById('payMethod').value;
             const receiptNum = document.getElementById('receiptNum').value;
+            const subscriberAccount = document.getElementById('subscriberAccount').value;
 
             if(!name || !nin || !rank || !workplace || !municipality) {
                 alert("يرجى ملء كافة الحقول الإلزامية.");
                 return;
             }
-            if(payMethod === 'edahabia' && !receiptNum) {
-                alert("يرجى إدخال رقم عملية الدفع الموجود في الوصل.");
+            if(payMethod === 'edahabia' && (!receiptNum || !subscriberAccount)) {
+                alert("يرجى إدخال رقم الحساب البريدي ورقم عملية الدفع.");
                 return;
             }
 
@@ -268,6 +288,7 @@
             formData.append('subType', subType);
             formData.append('payMethod', payMethod);
             formData.append('receiptNum', receiptNum); 
+            formData.append('subscriberAccount', subscriberAccount); 
 
             fetch(WEB_APP_URL, { method: 'POST', body: formData, mode: 'cors' })
             .then(res => res.json())
